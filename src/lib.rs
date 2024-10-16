@@ -1,26 +1,27 @@
 use std::f64;
+use js_sys::Math::*;
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
-const STD_GRAVITY: f32 = 9.8;
-const STD_METER_SIZE: f32 = 50.0;
+const STD_GRAVITY: f64 = 9.8;
+const STD_METER_SIZE: f64 = 50.0;
 
 #[derive(Clone)]
 pub struct Object {
-    pos_x: f32,
-    pos_y: f32,
-    velocity_x: f32,
-    velocity_y: f32,
-    radius: f32,
-    mass: f32,
+    pos_x: f64,
+    pos_y: f64,
+    velocity_x: f64,
+    velocity_y: f64,
+    radius: f64,
+    mass: f64,
+    restitution_coef: f64
 }
-
-
+#[derive(Clone)]
 #[wasm_bindgen]
 pub struct World {
-    gravity_x: f32,
-    gravity_y: f32,
-    meter_size: f32,
+    gravity_x: f64,
+    gravity_y: f64,
+    meter_size: f64,
     objects: Vec<Object>
 }
 
@@ -28,8 +29,22 @@ pub struct World {
 pub struct WorldView {
     canvas_width: u32,
     canvas_height: u32,
-    center: (f32, f32),
-    scale: f32
+    center: (f64, f64),
+    scale: f64
+}
+
+fn gen_pairs(n: usize) -> Vec<[usize; 2]> {
+    let mut pairs = Vec::new();
+
+    for i in 0..n {
+        for j in 0..n {
+            if i != j {
+                pairs.push([i, j]);
+            }
+        }
+    }
+
+    pairs
 }
 
 /// Public methods, exported to JavaScript.
@@ -44,37 +59,73 @@ impl World {
         }
     }
 
-    pub fn set_gravity_x(&mut self, gravity: f32) {
+    pub fn set_gravity_x(&mut self, gravity: f64) {
         self.gravity_x = gravity;
     }
 
-    pub fn set_gravity_y(&mut self, gravity: f32) {
+    pub fn set_gravity_y(&mut self, gravity: f64) {
         self.gravity_y = gravity;
     }
 
-    pub fn set_meter_size(&mut self, size: f32) {
+    pub fn set_meter_size(&mut self, size: f64) {
         self.meter_size = size;
     }
 
     pub fn add_object(
-        &mut self, pos_x: f32, pos_y: f32,
-        velocity_x: f32, velocity_y: f32,
-        radius: f32, mass: f32
+        &mut self, pos_x: f64, pos_y: f64,
+        velocity_x: f64, velocity_y: f64,
+        radius: f64, mass: f64, restitution_coef: f64
     ) {
         self.objects.push(
-            Object{pos_x, pos_y, velocity_x, velocity_y, radius, mass});
+            Object{pos_x, pos_y, velocity_x, velocity_y, radius, mass, restitution_coef});
     }
 
-    pub fn get_nb_object(&self) -> usize {
-        self.objects.len()
+    pub fn get_world(&self) -> World {
+        self.clone()
     }
 
     pub fn apply_physic(&mut self, elapsed_time_ms: u32) {
-        let elapsed_time: f32 = elapsed_time_ms as f32 / 1000.0;
+        let elapsed_time: f64 = elapsed_time_ms as f64 / 1000.0;
+        let pairs = gen_pairs(self.objects.len());
         for obj in self.objects.iter_mut() {
             obj.velocity_x += self.gravity_x * elapsed_time * self.meter_size;
             obj.velocity_y += self.gravity_y * elapsed_time * self.meter_size;
         }
+
+        for pair in pairs.iter() {
+            let (left, right) = self.objects.split_at_mut(pair[0].max(pair[1]));
+            let obj = &mut left[pair[0].min(pair[1])];
+            let obj_ = &mut right[0];
+        
+            let delta_x = obj_.pos_x - obj.pos_x;
+            let delta_y = obj_.pos_y - obj.pos_y;
+            let distance = (delta_x * delta_x + delta_y * delta_y).sqrt();
+            let overlap = obj.radius + obj_.radius - distance;
+        
+            if overlap > 0.0 {
+                let a = (obj_.pos_y - obj.pos_y).atan2(obj_.pos_x - obj.pos_x);
+                let correction_ratio = overlap / distance;
+                obj.pos_x -= delta_x * correction_ratio;
+                obj.pos_y -= delta_y * correction_ratio;
+                obj_.pos_x += delta_x * correction_ratio;
+                obj_.pos_y += delta_y * correction_ratio;
+        
+                let relative_velocity_x = obj_.velocity_x - obj.velocity_x;
+                let relative_velocity_y = obj_.velocity_y - obj.velocity_y;
+        
+                let restitution_coef = obj.restitution_coef.max(obj_.restitution_coef);
+        
+                let dot_product = delta_x * relative_velocity_x + delta_y * relative_velocity_y;
+                let impulse = (2.0 * dot_product) / (distance * (obj.mass + obj_.mass));
+        
+                obj.velocity_x += (impulse * obj_.mass * delta_x * restitution_coef) / distance;
+                obj.velocity_y += (impulse * obj_.mass * delta_y * restitution_coef) / distance;
+        
+                obj_.velocity_x -= (impulse * obj.mass * delta_x * restitution_coef) / distance;
+                obj_.velocity_y -= (impulse * obj.mass * delta_y * restitution_coef) / distance;
+            }
+        }
+
         for obj in self.objects.iter_mut() {
             obj.pos_x += obj.velocity_x * elapsed_time;
             obj.pos_y += obj.velocity_y * elapsed_time;
@@ -94,7 +145,7 @@ impl WorldView {
         self.canvas_height = canvas_height;
     }
 
-    pub fn set_scale(&mut self, scale: f32) {
+    pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale; 
     }
 

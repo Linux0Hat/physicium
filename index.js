@@ -6,12 +6,15 @@ import('./pkg')
         const ctx = canvas.getContext('2d');
 
         let world = wasm.World.new();
-        world.add_object(100., 20., 0., 0., 20., 40.);
-        world.add_object(20., 40., 0., 0., 30., 40.);
+        world.add_object(100., 20., 40., -100., 20., 40., 0.8);
+        world.add_object(20., 400., 100., -400., 30., 40., 0.8);
 
         let view = wasm.WorldView.new(800, 800)
+        t=performance.now();
         function loop() {
-            world.apply_physic(16);
+            let elapsed_ms = performance.now() - t;
+            t=performance.now();
+            world.apply_physic(elapsed_ms);
             view.draw(world, ctx);
             requestAnimationFrame(loop);
         }
