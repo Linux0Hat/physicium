@@ -1,5 +1,4 @@
 use std::f64;
-use js_sys::Math::*;
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
@@ -87,11 +86,31 @@ impl World {
     pub fn apply_physic(&mut self, elapsed_time_ms: u32) {
         let elapsed_time: f64 = elapsed_time_ms as f64 / 1000.0;
         let pairs = gen_pairs(self.objects.len());
+
+        // gravity
         for obj in self.objects.iter_mut() {
             obj.velocity_x += self.gravity_x * elapsed_time * self.meter_size;
             obj.velocity_y += self.gravity_y * elapsed_time * self.meter_size;
         }
 
+        // universal gravitation
+        for pair in pairs.iter() {
+            let (left, right) = self.objects.split_at_mut(pair[0].max(pair[1]));
+            let obj = &mut left[pair[0].min(pair[1])];
+            let obj_ = &mut right[0];
+            let delta_x = obj_.pos_x - obj.pos_x;
+            let delta_y = obj_.pos_y - obj.pos_y;
+            let d = (delta_x * delta_x + delta_y * delta_y).sqrt() / self.meter_size;
+            let G = 6.674e-11;
+            let F = ((G * (obj.mass * obj_.mass)) / (d * d));
+            let a = delta_y.atan2(delta_x);
+            obj.velocity_x += F * elapsed_time * a.cos();
+            obj.velocity_y += F * elapsed_time * a.sin();
+            obj_.velocity_x -= F * elapsed_time * a.cos();
+            obj_.velocity_y -= F * elapsed_time * a.sin();
+        }
+
+        // collisions
         for pair in pairs.iter() {
             let (left, right) = self.objects.split_at_mut(pair[0].max(pair[1]));
             let obj = &mut left[pair[0].min(pair[1])];
@@ -126,6 +145,7 @@ impl World {
             }
         }
 
+        // position
         for obj in self.objects.iter_mut() {
             obj.pos_x += obj.velocity_x * elapsed_time;
             obj.pos_y += obj.velocity_y * elapsed_time;
