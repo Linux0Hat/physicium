@@ -1,11 +1,13 @@
 use std::f64;
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
+use serde::{Serialize, Deserialize};
+use serde_wasm_bindgen::{to_value, from_value};
 
 const STD_GRAVITY: f64 = 9.8;
 const STD_METER_SIZE: f64 = 50.0;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Object {
     pos_x: f64,
     pos_y: f64,
@@ -15,7 +17,8 @@ pub struct Object {
     mass: f64,
     restitution_coef: f64
 }
-#[derive(Clone)]
+
+#[derive(Clone, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub struct World {
     gravity_x: f64,
@@ -79,8 +82,12 @@ impl World {
             Object{pos_x, pos_y, velocity_x, velocity_y, radius, mass, restitution_coef});
     }
 
-    pub fn get_world(&self) -> World {
-        self.clone()
+    pub fn get_world(&self) -> JsValue {
+        to_value(self).unwrap()
+    }
+
+    pub fn set_world(js_value: JsValue) -> World {
+        from_value(js_value).unwrap()  // Deserialize the JsValue back into a World struct
     }
 
     pub fn apply_physic(&mut self, elapsed_time_ms: u32) {
@@ -160,9 +167,9 @@ impl WorldView {
         WorldView{canvas_width, canvas_height, center:(0.0, 0.0), scale: 1.0 }
     }
 
-    pub fn set_view_center(&mut self, canvas_width: u32, canvas_height: u32) {
-        self.canvas_width = canvas_width;
-        self.canvas_height = canvas_height;
+    pub fn set_view_center(&mut self, center_x: f64, center_y: f64) {
+        self.center.0 = center_x;
+        self.center.1 = center_y;
     }
 
     pub fn set_scale(&mut self, scale: f64) {
@@ -176,8 +183,8 @@ impl WorldView {
         for obj in world.objects.iter() {
             ctx.begin_path();
             ctx.arc(
-                (obj.pos_x - self.center.0) as f64,
-                (obj.pos_y - self.center.1) as f64,
+                (obj.pos_x - self.center.0 + self.canvas_width as f64/2.0) as f64,
+                (obj.pos_y - self.center.1 + self.canvas_height as f64/2.0) as f64,
                 obj.radius as f64,
                 0.0,
                 3.1415 * 2.0
