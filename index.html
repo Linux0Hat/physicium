@@ -1,10 +1,43 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <link href=https://tomhodgins.github.io/preset/preset.css rel=stylesheet>
   </head>
   <body>
     <canvas id="canvas" height="800" width="800" style="outline: 5px solid black"></canvas>
-    <button id="bCollision">Collisions</button>
-    <button id="bUniversal">Universal</button>
+    <div style="width: 750px;">
+      <fieldset>
+        <legend>World</legend>
+        <span>Select a preset : 
+          <select id="world_preset">
+            <option value="collision">Collision</option>
+            <option value="universal">Universal gravitation</option>
+          </select>
+        </span>
+        <div>
+          <input type="checkbox" id="pause" />
+          <label for="pause">Pause</label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>View settings</legend>
+      
+        <div>
+          <input type="checkbox" id="follow" />
+          <label for="follow">Follow</label>
+        </div>
+      
+        <fieldset>
+          <legend><input type="checkbox" id="vectors" checked />
+            <label for="vectors">Vectors</label></legend>
+        
+          <div>
+            <input type="checkbox" id="vectors_values" />
+            <label for="vectors_values">Display values</label>
+          </div>
+        </fieldset>
+      </fieldset>
+    </div>
   </body>
 </html>

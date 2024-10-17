@@ -5,7 +5,8 @@ use serde::{Serialize, Deserialize};
 use serde_wasm_bindgen::{to_value, from_value};
 
 const STD_GRAVITY: f64 = 9.8;
-const STD_METER_SIZE: f64 = 50.0;
+const STD_METER_SIZE: f64 = 50.;
+const PI: f64 = 3.1415;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Object {
@@ -49,12 +50,24 @@ fn gen_pairs(n: usize) -> Vec<[usize; 2]> {
     pairs
 }
 
+fn canvas_arrow(ctx: &CanvasRenderingContext2d, from_x: f64, from_y: f64, to_x: f64, to_y: f64) {
+    let headlen = 10.; // length of head in pixels
+    let dx = to_x - from_x;
+    let dy = to_y - from_y;
+    let angle = dy.atan2(dx);
+    ctx.move_to(from_x, from_y);
+    ctx.line_to(to_x, to_y);
+    ctx.line_to(to_x - headlen * (angle - PI / 6.).cos(), to_y - headlen * (angle - PI / 6.).sin());
+    ctx.move_to(to_x, to_y);
+    ctx.line_to(to_x - headlen * (angle + PI / 6.).cos(), to_y - headlen * (angle + PI / 6.).sin());
+  }
+
 /// Public methods, exported to JavaScript.
 #[wasm_bindgen]
 impl World {
     pub fn new() -> World {
         World{
-            gravity_x: 0.0,
+            gravity_x: 0.,
             gravity_y: STD_GRAVITY,
             meter_size: STD_METER_SIZE,
             objects: Vec::new()
@@ -91,7 +104,7 @@ impl World {
     }
 
     pub fn apply_physic(&mut self, elapsed_time_ms: u32) {
-        let elapsed_time: f64 = elapsed_time_ms as f64 / 1000.0;
+        let elapsed_time: f64 = elapsed_time_ms as f64 / 1000.;
         let pairs = gen_pairs(self.objects.len());
 
         // gravity
@@ -128,7 +141,7 @@ impl World {
             let distance = (delta_x * delta_x + delta_y * delta_y).sqrt();
             let overlap = obj.radius + obj_.radius - distance;
         
-            if overlap > 0.0 {
+            if overlap > 0. {
                 let a = (obj_.pos_y - obj.pos_y).atan2(obj_.pos_x - obj.pos_x);
                 let correction_ratio = overlap / distance;
                 obj.pos_x -= delta_x * correction_ratio;
@@ -142,7 +155,7 @@ impl World {
                 let restitution_coef = obj.restitution_coef.max(obj_.restitution_coef);
         
                 let dot_product = delta_x * relative_velocity_x + delta_y * relative_velocity_y;
-                let impulse = (2.0 * dot_product) / (distance * (obj.mass + obj_.mass));
+                let impulse = (2. * dot_product) / (distance * (obj.mass + obj_.mass));
         
                 obj.velocity_x += (impulse * obj_.mass * delta_x * restitution_coef) / distance;
                 obj.velocity_y += (impulse * obj_.mass * delta_y * restitution_coef) / distance;
@@ -164,7 +177,7 @@ impl World {
 #[wasm_bindgen]
 impl WorldView {
     pub fn new(canvas_width: u32, canvas_height: u32) -> WorldView {
-        WorldView{canvas_width, canvas_height, center:(0.0, 0.0), scale: 1.0 }
+        WorldView{canvas_width, canvas_height, center:(0., 0.), scale: 1. }
     }
 
     pub fn set_view_center(&mut self, center_x: f64, center_y: f64) {
@@ -183,16 +196,32 @@ impl WorldView {
         for obj in world.objects.iter() {
             ctx.begin_path();
             ctx.arc(
-                (obj.pos_x - self.center.0 + self.canvas_width as f64/2.0) as f64,
-                (obj.pos_y - self.center.1 + self.canvas_height as f64/2.0) as f64,
+                (obj.pos_x - self.center.0 + self.canvas_width as f64/2.) as f64,
+                (obj.pos_y - self.center.1 + self.canvas_height as f64/2.) as f64,
                 obj.radius as f64,
-                0.0,
-                3.1415 * 2.0
+                0.,
+                PI * 2.
             );
             // ctx.set_fill_style(&"rgb(0,0,0)".into());
             ctx.fill();
             ctx.close_path();
         }
+    }
+
+    pub fn draw_vectors(&self, world: &World, ctx: CanvasRenderingContext2d, scale: f64, display_values: bool) {
+        ctx.set_stroke_style(&"red".into());
+        ctx.begin_path();
+        for obj in world.objects.iter() {
+            let pos_x = obj.pos_x - self.center.0 + self.canvas_width as f64/2.;
+            let pos_y = obj.pos_y - self.center.1 + self.canvas_height as f64/2.;
+            canvas_arrow(&ctx, pos_x, pos_y, pos_x+obj.velocity_x/scale, pos_y+obj.velocity_y/scale);
+            if(display_values) {
+                ctx.set_font("20px Arial");
+                ctx.set_fill_style(&"red".into());
+                ctx.fill_text(&format!("{:.2}", (obj.velocity_x*obj.velocity_x + obj.velocity_y*obj.velocity_y).sqrt()),pos_x ,pos_y);
+            }
+        }
+        ctx.stroke();
     }
 
 }
