@@ -142,7 +142,6 @@ impl World {
             let overlap = obj.radius + obj_.radius - distance;
         
             if overlap > 0. {
-                let a = (obj_.pos_y - obj.pos_y).atan2(obj_.pos_x - obj.pos_x);
                 let correction_ratio = overlap / distance;
                 obj.pos_x -= delta_x * correction_ratio;
                 obj.pos_y -= delta_y * correction_ratio;
@@ -190,9 +189,9 @@ impl WorldView {
     }
 
     pub fn draw(&self, world: &World, ctx: CanvasRenderingContext2d) {
-        ctx.set_fill_style(&"white".into());  
+        ctx.set_fill_style_str("white");  
         ctx.fill_rect(0., 0., 800., 800.);
-        ctx.set_fill_style(&"black".into());  
+        ctx.set_fill_style_str("black");  
         for obj in world.objects.iter() {
             ctx.begin_path();
             ctx.arc(
@@ -202,14 +201,17 @@ impl WorldView {
                 0.,
                 PI * 2.
             );
-            // ctx.set_fill_style(&"rgb(0,0,0)".into());
             ctx.fill();
             ctx.close_path();
         }
+        ctx.set_font("20px Arial");
+        ctx.set_fill_style_str("black");
+        ctx.fill_text(&format!("View pos X:{:.0} Y:{:.0}", self.center.0, self.center.1),0. ,20.);
+        ctx.fill_text(&format!("1m -> {}px", world.meter_size),0. ,40.);
     }
 
     pub fn draw_vectors(&self, world: &World, ctx: CanvasRenderingContext2d, scale: f64, display_values: bool) {
-        ctx.set_stroke_style(&"red".into());
+        ctx.set_stroke_style_str("red");
         ctx.begin_path();
         for obj in world.objects.iter() {
             let pos_x = obj.pos_x - self.center.0 + self.canvas_width as f64/2.;
@@ -217,8 +219,21 @@ impl WorldView {
             canvas_arrow(&ctx, pos_x, pos_y, pos_x+obj.velocity_x/scale, pos_y+obj.velocity_y/scale);
             if(display_values) {
                 ctx.set_font("20px Arial");
-                ctx.set_fill_style(&"red".into());
+                ctx.set_fill_style_str("red");
                 ctx.fill_text(&format!("{:.2}", (obj.velocity_x*obj.velocity_x + obj.velocity_y*obj.velocity_y).sqrt()),pos_x ,pos_y);
+            }
+        }
+        ctx.stroke();
+        ctx.set_stroke_style_str("green");
+        ctx.begin_path();
+        for obj in world.objects.iter() {
+            let pos_x = obj.pos_x - self.center.0 + self.canvas_width as f64/2.;
+            let pos_y = obj.pos_y - self.center.1 + self.canvas_height as f64/2.;
+            canvas_arrow(&ctx, pos_x, pos_y, pos_x+world.gravity_x*5./scale, pos_y+world.gravity_y*5./scale);
+            if(display_values) {
+                ctx.set_font("20px Arial");
+                ctx.set_fill_style_str("green");
+                ctx.fill_text(&format!("{:.2}", (world.gravity_x*world.gravity_x + world.gravity_y*world.gravity_y).sqrt()),pos_x ,pos_y+20.);
             }
         }
         ctx.stroke();
