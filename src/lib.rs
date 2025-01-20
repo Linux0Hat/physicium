@@ -214,26 +214,28 @@ impl WorldView {
         ctx.set_stroke_style_str("red");
         ctx.begin_path();
         for obj in world.objects.iter() {
+            let value = (obj.velocity_x*obj.velocity_x + obj.velocity_y*obj.velocity_y).sqrt();
             let pos_x = obj.pos_x - self.center.0 + self.canvas_width as f64/2.;
             let pos_y = obj.pos_y - self.center.1 + self.canvas_height as f64/2.;
-            canvas_arrow(&ctx, pos_x, pos_y, pos_x+obj.velocity_x/scale, pos_y+obj.velocity_y/scale);
+            if(value != 0.) {canvas_arrow(&ctx, pos_x, pos_y, pos_x+obj.velocity_x/scale, pos_y+obj.velocity_y/scale);}
             if(display_values) {
                 ctx.set_font("20px Arial");
                 ctx.set_fill_style_str("red");
-                ctx.fill_text(&format!("{:.2}", (obj.velocity_x*obj.velocity_x + obj.velocity_y*obj.velocity_y).sqrt()),pos_x ,pos_y);
+                ctx.fill_text(&format!("{:.2}", value) ,pos_x ,pos_y);
             }
         }
         ctx.stroke();
         ctx.set_stroke_style_str("green");
         ctx.begin_path();
         for obj in world.objects.iter() {
+            let value = (world.gravity_x*world.gravity_x + world.gravity_y*world.gravity_y).sqrt();
             let pos_x = obj.pos_x - self.center.0 + self.canvas_width as f64/2.;
             let pos_y = obj.pos_y - self.center.1 + self.canvas_height as f64/2.;
-            canvas_arrow(&ctx, pos_x, pos_y, pos_x+world.gravity_x*5./scale, pos_y+world.gravity_y*5./scale);
+            if(value != 0.) {canvas_arrow(&ctx, pos_x, pos_y, pos_x+world.gravity_x*5./scale, pos_y+world.gravity_y*5./scale);}
             if(display_values) {
                 ctx.set_font("20px Arial");
                 ctx.set_fill_style_str("green");
-                ctx.fill_text(&format!("{:.2}", (world.gravity_x*world.gravity_x + world.gravity_y*world.gravity_y).sqrt()),pos_x ,pos_y+20.);
+                ctx.fill_text(&format!("{:.2}", value),pos_x ,pos_y+20.);
             }
         }
         ctx.stroke();
