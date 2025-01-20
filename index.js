@@ -9,16 +9,16 @@ import('./pkg')
         // Set world to the collision preset
         function worldCollision() {
             world = wasm.World.new();
-            world.add_object(0., -380., 40., -100., 20., 20., 0.8);
-            world.add_object(-80., 0., 100., -400., 30., 30., 0.8);
+            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);
+            world.add_object(-80., 0., 100., -400., 30., 30., 0.8, false);
         }
         
         // Set world to the universal gravitation preset
         function worldUniversal() {
             world = wasm.World.new();
-            world.add_object(0., 0., 0., 0., 50., 100000000000000000., 0.5);
-            world.add_object(0., -300., 600., 0., 20., 10000000., 0.5);
-            world.add_object(0., 200., -700., 0., 15., 5000000., 0.5);
+            world.add_object(0., 0., 0., 0., 50., 100000000000000000., 0.5, false);
+            world.add_object(0., -300., 600., 0., 20., 10000000., 0.5, false);
+            world.add_object(0., 200., -700., 0., 15., 5000000., 0.5, false);
             world.set_gravity_y(0.);
             world.set_meter_size(0.001);
         }

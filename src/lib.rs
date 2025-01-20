@@ -16,7 +16,8 @@ pub struct Object {
     velocity_y: f64,
     radius: f64,
     mass: f64,
-    restitution_coef: f64
+    restitution_coef: f64,
+    is_freeze: bool
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -89,10 +90,11 @@ impl World {
     pub fn add_object(
         &mut self, pos_x: f64, pos_y: f64,
         velocity_x: f64, velocity_y: f64,
-        radius: f64, mass: f64, restitution_coef: f64
+        radius: f64, mass: f64, restitution_coef: f64, 
+        is_freeze: bool
     ) {
         self.objects.push(
-            Object{pos_x, pos_y, velocity_x, velocity_y, radius, mass, restitution_coef});
+            Object{pos_x, pos_y, velocity_x, velocity_y, radius, mass, restitution_coef, is_freeze});
     }
 
     pub fn get_world(&self) -> JsValue {
@@ -142,32 +144,63 @@ impl World {
             let overlap = obj.radius + obj_.radius - distance;
         
             if overlap > 0. {
-                let correction_ratio = overlap / distance;
-                obj.pos_x -= delta_x * correction_ratio;
-                obj.pos_y -= delta_y * correction_ratio;
-                obj_.pos_x += delta_x * correction_ratio;
-                obj_.pos_y += delta_y * correction_ratio;
+                let a = (obj_.pos_y - obj.pos_y).atan2(obj_.pos_x - obj.pos_x);
+                if(obj.is_freeze) {
+                    obj_.pos_x += overlap * a.cos();
+                    obj_.pos_y += overlap * a.sin();
+                } 
+                else if(obj_.is_freeze) {
+                    obj.pos_x -= overlap * a.cos();
+                    obj.pos_y -= overlap * a.sin();
+                } else {
+                    let correction_ratio = overlap / distance;
+                    obj.pos_x -= delta_x * correction_ratio;
+                    obj.pos_y -= delta_y * correction_ratio;
+                    obj_.pos_x += delta_x * correction_ratio;
+                    obj_.pos_y += delta_y * correction_ratio;
+                }
+                
         
                 let relative_velocity_x = obj_.velocity_x - obj.velocity_x;
                 let relative_velocity_y = obj_.velocity_y - obj.velocity_y;
         
                 let restitution_coef = obj.restitution_coef.max(obj_.restitution_coef);
-        
+    
                 let dot_product = delta_x * relative_velocity_x + delta_y * relative_velocity_y;
-                let impulse = (2. * dot_product) / (distance * (obj.mass + obj_.mass));
-        
-                obj.velocity_x += (impulse * obj_.mass * delta_x * restitution_coef) / distance;
-                obj.velocity_y += (impulse * obj_.mass * delta_y * restitution_coef) / distance;
-        
-                obj_.velocity_x -= (impulse * obj.mass * delta_x * restitution_coef) / distance;
-                obj_.velocity_y -= (impulse * obj.mass * delta_y * restitution_coef) / distance;
+
+                if (obj.is_freeze) {
+                    let impulse = (2. * dot_product) / (distance * (obj_.mass + obj_.mass));
+                    let bounce_x = (impulse * obj_.mass * delta_x) / distance + restitution_coef * ((impulse * obj_.mass * delta_x) / distance);
+                    let bounce_y = (impulse * obj_.mass * delta_y) / distance + restitution_coef * ((impulse * obj_.mass * delta_y) / distance);
+
+                    obj_.velocity_x -= bounce_x;
+                    obj_.velocity_y -= bounce_y;
+                } 
+                else if (obj_.is_freeze) {
+                    let impulse = (2. * dot_product) / (distance * (obj.mass + obj.mass));
+                    let bounce_x = (impulse * obj.mass * delta_x) / distance + restitution_coef * ((impulse * obj.mass * delta_x) / distance);
+                    let bounce_y = (impulse * obj.mass * delta_y) / distance +restitution_coef * ((impulse * obj.mass * delta_y) / distance);
+                    obj.velocity_x += bounce_x;
+                    obj.velocity_y += bounce_y;
+                } 
+                else {
+                    let impulse = (2. * dot_product) / (distance * (obj.mass + obj_.mass));
+            
+                    obj.velocity_x += (impulse * obj_.mass * delta_x * restitution_coef) / distance;
+                    obj.velocity_y += (impulse * obj_.mass * delta_y * restitution_coef) / distance;
+            
+                    obj_.velocity_x -= (impulse * obj.mass * delta_x * restitution_coef) / distance;
+                    obj_.velocity_y -= (impulse * obj.mass * delta_y * restitution_coef) / distance;
+                }
             }
         }
 
         // position
         for obj in self.objects.iter_mut() {
-            obj.pos_x += obj.velocity_x * elapsed_time;
-            obj.pos_y += obj.velocity_y * elapsed_time;
+            if(!obj.is_freeze) {
+                obj.pos_x += obj.velocity_x * elapsed_time;
+                obj.pos_y += obj.velocity_y * elapsed_time;
+            }
         }
     }
 }
