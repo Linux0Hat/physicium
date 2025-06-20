@@ -9,13 +9,13 @@ module.exports = {
   },
   mode: "development", // Or "production"
   experiments: {
-    asyncWebAssembly: true,
+    asyncWebAssembly: true, // Enable WebAssembly support
   },
   module: {
     rules: [
       {
         test: /\.wasm$/,
-        type: "webassembly/async",
+        type: "webassembly/async", // Add rule for WebAssembly files
       },
     ],
   },
@@ -29,7 +29,7 @@ module.exports = {
     }),
   ],
   resolve: {
-    extensions: [".js", ".wasm"],
+    extensions: [".js", ".wasm"], // Add .wasm extension for resolving files
   },
   devServer: {
     static: "./dist",
