@@ -1,35 +1,38 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 module.exports = {
-    entry: './index.js',
-    output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'bundle.js', // changed from index.js to avoid conflicts
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: 'index.html'
-        }),
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, ".")
-        }),
+  entry: "./index.js", // Change this to your JS entry point if different
+  output: {
+    path: __dirname + "/dist",
+    filename: "bundle.js",
+  },
+  mode: "development", // Or "production"
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: "webassembly/async",
+      },
     ],
-    mode: process.env.NODE_ENV || 'development',
-    experiments: {
-        asyncWebAssembly: true
-    },
-    module: {
-        rules: [
-            {
-                test: /\.wasm$/,
-                type: 'webassembly/async'
-            }
-        ]
-    },
-    resolve: {
-        extensions: ['.js', '.wasm']
-    }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html", // Change this if your HTML entry is elsewhere
+    }),
+    new WasmPackPlugin({
+      crateDirectory: __dirname,
+      extraArgs: "--target bundler",
+    }),
+  ],
+  resolve: {
+    extensions: [".js", ".wasm"],
+  },
+  devServer: {
+    static: "./dist",
+    hot: true,
+  },
 };
