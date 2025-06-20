@@ -11,6 +11,7 @@ import('./pkg')
             world = wasm.World.new();
             world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);
             world.add_object(-80., 0., 100., -400., 30., 30., 0.8, false);
+            world.add_object(200., 300., 0., 0., 30., 30., 0.8, true);
         }
         
         // Set world to the universal gravitation preset
@@ -23,9 +24,16 @@ import('./pkg')
             world.set_meter_size(0.001);
         }
 
+        function worldMultiCollision() {
+            world = wasm.World.new();
+            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);
+            world.add_object(-200., 20., 0., 0., 30., 30., 0.8, false);
+        }
+
         let world_dictionary = {
             "collision": worldCollision,
-            "universal": worldUniversal
+            "universal": worldUniversal,
+
         }
 
         wolrd_preset_actual = document.getElementById("world_preset").value;

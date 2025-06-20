@@ -170,16 +170,16 @@ impl World {
 
                 if (obj.is_freeze) {
                     let impulse = (2. * dot_product) / (distance * (obj_.mass + obj_.mass));
-                    let bounce_x = (impulse * obj_.mass * delta_x) / distance + restitution_coef * ((impulse * obj_.mass * delta_x) / distance);
-                    let bounce_y = (impulse * obj_.mass * delta_y) / distance + restitution_coef * ((impulse * obj_.mass * delta_y) / distance);
+                    let bounce_x = (impulse * obj_.mass * delta_x) / distance + restitution_coef * ((impulse  * delta_x) / distance);
+                    let bounce_y = (impulse * obj_.mass * delta_y) / distance + restitution_coef * ((impulse * delta_y) / distance);
 
                     obj_.velocity_x -= bounce_x;
                     obj_.velocity_y -= bounce_y;
                 } 
                 else if (obj_.is_freeze) {
                     let impulse = (2. * dot_product) / (distance * (obj.mass + obj.mass));
-                    let bounce_x = (impulse * obj.mass * delta_x) / distance + restitution_coef * ((impulse * obj.mass * delta_x) / distance);
-                    let bounce_y = (impulse * obj.mass * delta_y) / distance +restitution_coef * ((impulse * obj.mass * delta_y) / distance);
+                    let bounce_x = (impulse * obj.mass * delta_x) / distance + restitution_coef * ((impulse * delta_x) / distance);
+                    let bounce_y = (impulse * obj.mass * delta_y) / distance +restitution_coef * ((impulse * delta_y) / distance);
                     obj.velocity_x += bounce_x;
                     obj.velocity_y += bounce_y;
                 } 
