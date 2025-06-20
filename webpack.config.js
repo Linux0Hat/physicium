@@ -20,5 +20,16 @@ module.exports = {
     mode: 'development',
     experiments: {
         asyncWebAssembly: true
-   }
+    },
+    module: {
+        rules: [
+            {
+                test: /\.wasm$/,
+                type: 'webassembly/async'
+            }
+        ]
+    },
+    resolve: {
+        extensions: ['.js', '.wasm']
+    }
 };
