@@ -15,7 +15,7 @@
   \******************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("__webpack_require__.e(/*! import() */ \"pkg_index_js\").then(__webpack_require__.t.bind(__webpack_require__, /*! ./pkg */ \"./pkg/index.js\", 23))\n    .then(wasm => {\n        const canvas = document.getElementById('canvas');\n        const ctx = canvas.getContext('2d');\n\n        let world;\n        let wolrd_preset_actual;\n\n        // Set world to the collision preset\n        function worldCollision() {\n            world = wasm.World.new();\n            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);\n            world.add_object(-80., 0., 100., -400., 30., 30., 0.8, false);\n            world.add_object(200., 300., 0., 0., 30., 30., 0.8, true);\n        }\n        \n        // Set world to the universal gravitation preset\n        function worldUniversal() {\n            world = wasm.World.new();\n            world.add_object(0., 0., 0., 0., 50., 100000000000000000., 0.5, false);\n            world.add_object(0., -300., 600., 0., 20., 10000000., 0.5, false);\n            world.add_object(0., 200., -700., 0., 15., 5000000., 0.5, false);\n            world.set_gravity_y(0.);\n            world.set_meter_size(0.001);\n        }\n\n        function worldMultiCollision() {\n            world = wasm.World.new();\n            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);\n            world.add_object(-200., 20., 0., 0., 30., 30., 0.8, false);\n        }\n\n        let world_dictionary = {\n            \"collision\": worldCollision,\n            \"universal\": worldUniversal,\n\n        }\n\n        wolrd_preset_actual = document.getElementById(\"world_preset\").value;\n        world_dictionary[wolrd_preset_actual]();\n\n        let view = wasm.WorldView.new(800, 800);\n\n        document.getElementById(\"restart_button\").onclick = function (){\n            world_dictionary[wolrd_preset_actual]();\n            view.set_view_center(0., 0.);\n        };\n\n        let t = performance.now();\n\n        function loop() {\n            // Get the duration of the previous iteration.\n            let elapsed_ms = performance.now() - t;\n            t = performance.now();\n\n            // Get values from the html file\n            var world_preset = document.getElementById(\"world_preset\").value;\n            var paused = document.getElementById(\"pause\").checked;\n            var follow_enabled = document.getElementById(\"follow\").checked;\n            var vector_enabled = document.getElementById(\"vectors\").checked;\n\n            // Change the preset world if the selection changed\n            if (world_preset !== wolrd_preset_actual) {\n                wolrd_preset_actual = world_preset;\n                world_dictionary[wolrd_preset_actual]();\n                view.set_view_center(0., 0.);\n            }\n\n            // Apply physics.\n            if (!paused) {\n                world.apply_physic(elapsed_ms);\n            }\n\n            // Change the position of the view's center\n            if (follow_enabled) {\n                view.set_view_center(world.get_world().objects[0].pos_x, world.get_world().objects[0].pos_y);\n            }\n\n            // Draw the wolrd in the canvas\n            view.draw(world, ctx);\n            \n            // Draw vectors\n            if (vector_enabled) {\n                view.draw_vectors(world, ctx, 1., document.getElementById(\"vectors_values\").checked);\n            }\n\n            requestAnimationFrame(loop);\n        }\n\n        // Start the simulation loop\n        loop();\n\n    })\n    .catch(console.error);\n\n\n//# sourceURL=webpack:///./index.js?");
+eval("__webpack_require__.e(/*! import() */ \"pkg_index_js\").then(__webpack_require__.bind(__webpack_require__, /*! ./pkg */ \"./pkg/index.js\"))\n    .then(wasm => {\n        const canvas = document.getElementById('canvas');\n        const ctx = canvas.getContext('2d');\n\n        let world;\n        let wolrd_preset_actual;\n\n        // Set world to the collision preset\n        function worldCollision() {\n            world = wasm.World.new();\n            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);\n            world.add_object(-80., 0., 100., -400., 30., 30., 0.8, false);\n            world.add_object(200., 300., 0., 0., 30., 30., 0.8, true);\n        }\n        \n        // Set world to the universal gravitation preset\n        function worldUniversal() {\n            world = wasm.World.new();\n            world.add_object(0., 0., 0., 0., 50., 100000000000000000., 0.5, false);\n            world.add_object(0., -300., 120., 0., 20., 10000000., 0.5, false);\n            world.add_object(0., 200., -170., 0., 15., 5000000., 0.5, false);\n            world.set_gravity_y(0.);\n            world.set_meter_size(1);\n        }\n\n        function worldMultiCollision() {\n            world = wasm.World.new();\n            world.add_object(0., -380., 40., -100., 20., 20., 0.8, false);\n            world.add_object(-200., 20., 0., 0., 30., 30., 0.8, false);\n        }\n\n        let world_dictionary = {\n            \"collision\": worldCollision,\n            \"universal\": worldUniversal,\n\n        }\n\n        wolrd_preset_actual = document.getElementById(\"world_preset\").value;\n        world_dictionary[wolrd_preset_actual]();\n\n        let view = wasm.WorldView.new(800, 800);\n\n        document.getElementById(\"restart_button\").onclick = function (){\n            world_dictionary[wolrd_preset_actual]();\n            view.set_view_center(0., 0.);\n        };\n\n        let t = performance.now();\n\n        function loop() {\n            // Get the duration of the previous iteration.\n            let elapsed_ms = performance.now() - t;\n            t = performance.now();\n\n            // Get values from the html file\n            var world_preset = document.getElementById(\"world_preset\").value;\n            var paused = document.getElementById(\"pause\").checked;\n            var follow_enabled = document.getElementById(\"follow\").checked;\n            var vector_enabled = document.getElementById(\"vectors\").checked;\n\n            // Change the preset world if the selection changed\n            if (world_preset !== wolrd_preset_actual) {\n                wolrd_preset_actual = world_preset;\n                world_dictionary[wolrd_preset_actual]();\n                view.set_view_center(0., 0.);\n            }\n\n            // Apply physics.\n            if (!paused) {\n                world.apply_physic(elapsed_ms);\n            }\n\n            // Change the position of the view's center\n            if (follow_enabled) {\n                view.set_view_center(world.get_world().objects[0].pos_x, world.get_world().objects[0].pos_y);\n            }\n\n            // Draw the wolrd in the canvas\n            view.draw(world, ctx);\n            \n            // Draw vectors\n            if (vector_enabled) {\n                view.draw_vectors(world, ctx, 1., document.getElementById(\"vectors_values\").checked);\n            }\n\n            requestAnimationFrame(loop);\n        }\n\n        // Start the simulation loop\n        loop();\n\n    })\n    .catch(console.error);\n\n\n//# sourceURL=webpack:///./index.js?");
 
 /***/ })
 
@@ -33,7 +33,7 @@ eval("__webpack_require__.e(/*! import() */ \"pkg_index_js\").then(__webpack_req
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
+/******/ 			id: moduleId,
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
@@ -49,33 +49,72 @@ eval("__webpack_require__.e(/*! import() */ \"pkg_index_js\").then(__webpack_req
 /******/ 	__webpack_require__.m = __webpack_modules__;
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/create fake namespace object */
+/******/ 	/* webpack/runtime/async module */
 /******/ 	(() => {
-/******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
-/******/ 		var leafPrototypes;
-/******/ 		// create a fake namespace object
-/******/ 		// mode & 1: value is a module id, require it
-/******/ 		// mode & 2: merge all properties of value into the ns
-/******/ 		// mode & 4: return value when already ns object
-/******/ 		// mode & 16: return value when it's Promise-like
-/******/ 		// mode & 8|1: behave like require
-/******/ 		__webpack_require__.t = function(value, mode) {
-/******/ 			if(mode & 1) value = this(value);
-/******/ 			if(mode & 8) return value;
-/******/ 			if(typeof value === 'object' && value) {
-/******/ 				if((mode & 4) && value.__esModule) return value;
-/******/ 				if((mode & 16) && typeof value.then === 'function') return value;
+/******/ 		var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
+/******/ 		var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
+/******/ 		var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
+/******/ 		var resolveQueue = (queue) => {
+/******/ 			if(queue && queue.d < 1) {
+/******/ 				queue.d = 1;
+/******/ 				queue.forEach((fn) => (fn.r--));
+/******/ 				queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
 /******/ 			}
-/******/ 			var ns = Object.create(null);
-/******/ 			__webpack_require__.r(ns);
-/******/ 			var def = {};
-/******/ 			leafPrototypes = leafPrototypes || [null, getProto({}), getProto([]), getProto(getProto)];
-/******/ 			for(var current = mode & 2 && value; typeof current == 'object' && !~leafPrototypes.indexOf(current); current = getProto(current)) {
-/******/ 				Object.getOwnPropertyNames(current).forEach((key) => (def[key] = () => (value[key])));
+/******/ 		}
+/******/ 		var wrapDeps = (deps) => (deps.map((dep) => {
+/******/ 			if(dep !== null && typeof dep === "object") {
+/******/ 				if(dep[webpackQueues]) return dep;
+/******/ 				if(dep.then) {
+/******/ 					var queue = [];
+/******/ 					queue.d = 0;
+/******/ 					dep.then((r) => {
+/******/ 						obj[webpackExports] = r;
+/******/ 						resolveQueue(queue);
+/******/ 					}, (e) => {
+/******/ 						obj[webpackError] = e;
+/******/ 						resolveQueue(queue);
+/******/ 					});
+/******/ 					var obj = {};
+/******/ 					obj[webpackQueues] = (fn) => (fn(queue));
+/******/ 					return obj;
+/******/ 				}
 /******/ 			}
-/******/ 			def['default'] = () => (value);
-/******/ 			__webpack_require__.d(ns, def);
-/******/ 			return ns;
+/******/ 			var ret = {};
+/******/ 			ret[webpackQueues] = x => {};
+/******/ 			ret[webpackExports] = dep;
+/******/ 			return ret;
+/******/ 		}));
+/******/ 		__webpack_require__.a = (module, body, hasAwait) => {
+/******/ 			var queue;
+/******/ 			hasAwait && ((queue = []).d = -1);
+/******/ 			var depQueues = new Set();
+/******/ 			var exports = module.exports;
+/******/ 			var currentDeps;
+/******/ 			var outerResolve;
+/******/ 			var reject;
+/******/ 			var promise = new Promise((resolve, rej) => {
+/******/ 				reject = rej;
+/******/ 				outerResolve = resolve;
+/******/ 			});
+/******/ 			promise[webpackExports] = exports;
+/******/ 			promise[webpackQueues] = (fn) => (queue && fn(queue), depQueues.forEach(fn), promise["catch"](x => {}));
+/******/ 			module.exports = promise;
+/******/ 			body((deps) => {
+/******/ 				currentDeps = wrapDeps(deps);
+/******/ 				var fn;
+/******/ 				var getResult = () => (currentDeps.map((d) => {
+/******/ 					if(d[webpackError]) throw d[webpackError];
+/******/ 					return d[webpackExports];
+/******/ 				}))
+/******/ 				var promise = new Promise((resolve) => {
+/******/ 					fn = () => (resolve(getResult));
+/******/ 					fn.r = 0;
+/******/ 					var fnQueue = (q) => (q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))));
+/******/ 					currentDeps.map((dep) => (dep[webpackQueues](fnQueue)));
+/******/ 				});
+/******/ 				return fn.r ? promise : getResult();
+/******/ 			}, (err) => ((err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue)));
+/******/ 			queue && queue.d < 0 && (queue.d = 0);
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -184,6 +223,35 @@ eval("__webpack_require__.e(/*! import() */ \"pkg_index_js\").then(__webpack_req
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/wasm loading */
+/******/ 	(() => {
+/******/ 		__webpack_require__.v = (exports, wasmModuleId, wasmModuleHash, importsObj) => {
+/******/ 		
+/******/ 			var req = fetch(__webpack_require__.p + "" + wasmModuleHash + ".module.wasm");
+/******/ 			var fallback = () => (req
+/******/ 				.then((x) => (x.arrayBuffer()))
+/******/ 				.then((bytes) => (WebAssembly.instantiate(bytes, importsObj)))
+/******/ 				.then((res) => (Object.assign(exports, res.instance.exports))));
+/******/ 			return req.then((res) => {
+/******/ 				if (typeof WebAssembly.instantiateStreaming === "function") {
+/******/ 		
+/******/ 					return WebAssembly.instantiateStreaming(res, importsObj)
+/******/ 						.then(
+/******/ 							(res) => (Object.assign(exports, res.instance.exports)),
+/******/ 							(e) => {
+/******/ 								if(res.headers.get("Content-Type") !== "application/wasm") {
+/******/ 									console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
+/******/ 									return fallback();
+/******/ 								}
+/******/ 								throw e;
+/******/ 							}
+/******/ 						);
+/******/ 				}
+/******/ 				return fallback();
+/******/ 			});
 /******/ 		};
 /******/ 	})();
 /******/ 	
