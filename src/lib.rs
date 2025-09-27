@@ -126,10 +126,10 @@ impl World {
             let G = 6.674e-11;
             let F = ((G * (obj.mass * obj_.mass)) / (d * d));
             let a = delta_y.atan2(delta_x);
-            obj.velocity_x += F.obj.mass * elapsed_time * a.cos();
-            obj.velocity_y += F.obj.mass * elapsed_time * a.sin();
-            obj_.velocity_x -= F.obj_.mass * elapsed_time * a.cos();
-            obj_.velocity_y -= F.obj_.mass * elapsed_time * a.sin();
+            obj.velocity_x += F/obj.mass * elapsed_time * a.cos();
+            obj.velocity_y += F/obj.mass * elapsed_time * a.sin();
+            obj_.velocity_x -= F/obj_.mass * elapsed_time * a.cos();
+            obj_.velocity_y -= F/obj_.mass * elapsed_time * a.sin();
         }
 
         // collisions

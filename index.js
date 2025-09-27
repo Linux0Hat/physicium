@@ -18,10 +18,10 @@ import('./pkg')
         function worldUniversal() {
             world = wasm.World.new();
             world.add_object(0., 0., 0., 0., 50., 100000000000000000., 0.5, false);
-            world.add_object(0., -300., 600., 0., 20., 10000000., 0.5, false);
-            world.add_object(0., 200., -700., 0., 15., 5000000., 0.5, false);
+            world.add_object(0., -300., 120., 0., 20., 10000000., 0.5, false);
+            world.add_object(0., 200., -170., 0., 15., 5000000., 0.5, false);
             world.set_gravity_y(0.);
-            world.set_meter_size(0.001);
+            world.set_meter_size(1);
         }
 
         function worldMultiCollision() {
